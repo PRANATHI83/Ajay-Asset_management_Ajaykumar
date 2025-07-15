@@ -68,7 +68,7 @@ async function initializeDatabase() {
             INSERT INTO asset_requests 
                 (employee_id, employee_name, email, request_date, asset_type, asset_name, details, status)
             VALUES 
-                ('ATS0123', 'John Doe', 'john.doe@gmail.com', CURRENT_DATE, 'Laptop', 'MacBook Pro', 'Need for development work', 'Approved')
+                ('ATS0123', 'John Doe', 'john.doe123@gmail.com', CURRENT_DATE, 'Laptop', 'MacBook Pro', 'Need for development work', 'Approved')
             ON CONFLICT DO NOTHING;
         `);
         console.log('Database initialized with sample data.');
