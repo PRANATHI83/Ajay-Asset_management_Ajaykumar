@@ -1,4 +1,4 @@
--- Connect to the correct database
+-- Connect to the database
 \c new_employee_db;
 
 -- Create the asset_requests table
@@ -13,24 +13,17 @@ CREATE TABLE IF NOT EXISTS asset_requests (
     details VARCHAR(150) NOT NULL,
     status VARCHAR(20) DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    CONSTRAINT valid_email CHECK (
-        email ~* '^[a-zA-Z0-9][a-zA-Z0-9\\-_\\.]{1,28}[a-zA-Z0-9]@gmail\\.com$'
-    ),
-    
-    CONSTRAINT valid_employee_id CHECK (
-        employee_id ~ '^ATS0[0-9]{3}$' AND employee_id <> 'ATS0000'
-    )
+
+    -- Constraints
+    CONSTRAINT valid_email CHECK (email ~* '^[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]@gmail\\.com$'),
+    CONSTRAINT valid_employee_id CHECK (employee_id ~ '^ATS0[0-9]{3}$' AND employee_id <> 'ATS0000')
 );
 
--- Prevent duplicate asset request for the same employee, same asset and date
+-- Unique constraint to avoid duplicate requests per day
 CREATE UNIQUE INDEX IF NOT EXISTS unique_asset_request
 ON asset_requests (employee_id, asset_name, request_date);
 
--- Insert sample data (only if not already present)
-INSERT INTO asset_requests (
-    employee_id, employee_name, email, request_date, asset_type, asset_name, details, status
-) VALUES (
-    'ATS0123', 'John Doe', 'john.doe@gmail.com', CURRENT_DATE, 'Laptop', 'MacBook Pro', 'Need for development work', 'Approved'
-)
+-- Insert sample data
+INSERT INTO asset_requests (employee_id, employee_name, email, request_date, asset_type, asset_name, details, status)
+VALUES ('ATS0123', 'John Doe', 'john.doe@gmail.com', CURRENT_DATE, 'Laptop', 'MacBook Pro', 'Need for development work', 'Approved')
 ON CONFLICT DO NOTHING;
