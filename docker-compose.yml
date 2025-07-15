@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: ajay_asset_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin234
+      POSTGRES_DB: new_employee_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5439:5432"
+
+  backend:
+    build: ./Backend
+    container_name: ajay_asset_backend
+    depends_on:
+      - postgres
+    ports:
+      - "3007:3007"
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: admin834
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: new_employee_db
+    volumes:
+      - ./Backend:/app
+
+  frontend:
+    build: ./Frontend
+    container_name: ajay_asset_frontend
+    ports:
+      - "8016:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./Frontend:/usr/share/nginx/html
+
+  hr:
+    build: ./Hr_Page
+    container_name: ajay_asset_hrpage
+    ports:
+      - "8017:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./Hr_Page:/usr/share/nginx/html
+
+volumes:
+  pgdata:
+
+
