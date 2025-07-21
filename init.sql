@@ -1,3 +1,4 @@
+
 CREATE TABLE IF NOT EXISTS asset_requests (
                 id SERIAL PRIMARY KEY,
                 employee_id VARCHAR(7),
