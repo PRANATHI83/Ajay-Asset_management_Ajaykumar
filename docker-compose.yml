@@ -2,56 +2,64 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
-    container_name: ajay_asset_postgres
-    restart: always
+    image: postgres:14
+    container_name: postgres_db
     environment:
+      POSTGRES_DB: new_employee_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin234
-      POSTGRES_DB: new_employee_db
+    ports:
+      - "5425:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5439:5432"
+    networks:
+      - asset_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
-    build: ./Backend
-    container_name: ajay_asset_backend
-    depends_on:
-      - postgres
+    build:
+      context: ./Backend
+    container_name: backend_service
     ports:
-      - "3007:3007"
+      - "3425:3425"
     environment:
-      DB_USER: postgres
-      DB_PASSWORD: admin834
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: new_employee_db
-    volumes:
-      - ./Backend:/app
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=admin234
+      - DB_NAME=new_employee_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - asset_network
 
   frontend:
-    build: ./Frontend
-    container_name: ajay_asset_frontend
+    build:
+      context: ./Frontend
+    container_name: frontend_service
     ports:
-      - "8016:80"
-    depends_on:
-      - backend
-    volumes:
-      - ./Frontend:/usr/share/nginx/html
+      - "8047:80"
+    networks:
+      - asset_network
 
-  hr:
-    build: ./Hr_Page
-    container_name: ajay_asset_hrpage
+  hr_page:
+    build:
+      context: ./Hr_Page
+    container_name: hrpage_service
     ports:
-      - "8017:80"
-    depends_on:
-      - backend
-    volumes:
-      - ./Hr_Page:/usr/share/nginx/html
+      - "8048:80"
+    networks:
+      - asset_network
 
 volumes:
   pgdata:
 
-
+networks:
+  asset_network:
+    driver: bridge
